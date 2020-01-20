@@ -9,12 +9,6 @@ import org.scalatest.matchers.should.Matchers
 class ReadCsvToDfTest extends AnyFunSuite with Matchers with DataFrameSuiteBase {
 
   test("Testing readCsvToDF function...") {
-    //val spark = SparkSession
-      //.builder()
-     // .appName("DemoSparkApp")
-      //.config("spark.some.config.option", "some-value")
-      //.getOrCreate()
-
 
     val expectedSchema = List(
       StructField("match_id", LongType, nullable = false),
