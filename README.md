@@ -1,3 +1,4 @@
+
 #  Billion Matches project with Scala Maven on Apache Spark
 
 **There are two different versions of this project (Both of them are runnable):**
@@ -12,9 +13,10 @@
 -	Maven as build tool
 -	Apache Spark as data processing engine
 -	Input files can be found here under the "Samples" section: [https://blog.opendota.com/2017/03/24/datadump2](https://blog.opendota.com/2017/03/24/datadump2/)
--	Input file names: match_skill.csv, matches_small.csv, player_matches_small.csv
+-	Input file names: *match_skill.csv, matches_small.csv, player_matches_small.csv*
 -	Output file format: Parquet
 
 ## Author
 
-* **Adem Sezer** - [adam2adam](https://github.com/adam2adam)
+* **Adem Sezer** - [https://github.com/adam2adam](https://github.com/adam2adam)
+
