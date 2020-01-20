@@ -19,8 +19,9 @@ object Matches {
     }
 
     val conf = new SparkConf()
-    conf.setMaster("local")
+    conf.setMaster("local[*]")
     conf.setAppName("DemoSparkApp")
+    conf.set("spark.driver.allowMultipleContexts", "true")
     //conf.set("spark.master", "local")
     //conf.set("spark.app.name", "DemoSparkApp")
 
@@ -38,7 +39,7 @@ object Matches {
     val dfPlayerMatchSmall = readFileToDfAndClean(spark, args(2))
 
     prepareAndExport(dfMatchSkills, dfMatchSmall, dfPlayerMatchSmall)
-    //spark.stop()
+    spark.stop()
   }
 
   //Prepare data and export output files
@@ -115,7 +116,7 @@ object Matches {
   // For testing
   def readCsvToDF(fileName: String): DataFrame = {
     val conf2 = new SparkConf()
-    conf2.setMaster("local")
+    conf2.setMaster("local[*]")
     conf2.setAppName("DemoSparkApp")
 
     val sc = new SparkContext(conf2)
@@ -141,4 +142,5 @@ object Matches {
     val file = File(fileName)
     if (file.isFile && file.exists) true else false
   }
+
 }
