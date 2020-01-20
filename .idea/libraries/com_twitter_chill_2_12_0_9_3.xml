@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="com.twitter:chill_2.12:0.9.3" type="repository">
+    <properties maven-id="com.twitter:chill_2.12:0.9.3" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill_2.12/0.9.3/chill_2.12-0.9.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.12.6/scala-library-2.12.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/twitter/chill-java/0.9.3/chill-java-0.9.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/esotericsoftware/kryo-shaded/4.0.2/kryo-shaded-4.0.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/esotericsoftware/minlog/1.3.0/minlog-1.3.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/2.5.1/objenesis-2.5.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

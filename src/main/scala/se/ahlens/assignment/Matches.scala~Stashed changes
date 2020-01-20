@@ -1,0 +1,154 @@
+package se.ahlens.assignment
+
+import org.apache.spark.sql.functions.{col, _}
+import org.apache.spark.sql.types.{IntegerType, LongType}
+import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.{SparkConf, SparkContext}
+
+import scala.reflect.io.File
+
+object Matches {
+  val pathFiles = "D:/__Ahlens_Project/data/"
+
+  def readCsvToDF(fileName: String): DataFrame = {
+    val spark = SparkSession
+      .builder()
+      .appName("DemoSparkApp")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
+
+    val newDF = spark.sqlContext.read.format("com.databricks.spark.csv")
+      .option("header", "true") //first line in file has headers
+      .option("inferschema", "true")
+      .load(Matches.pathFiles + fileName)
+    newDF
+  }
+
+  def nanCleanse(df: DataFrame, columns: Array[String]): DataFrame = {
+    val retDF = df.na.fill(0, columns)
+    retDF
+  }
+
+  def isDirectoryExists(directory: String): Boolean = {
+    val dir = File(directory)
+    if (dir.isDirectory) true else false
+  }
+
+  def isFileExists(fileName: String): Boolean = {
+    val file = File(fileName)
+    if (file.isFile && file.exists) true else false
+  }
+
+  def main(args: Array[String]) {
+
+    val conf = new SparkConf()
+    conf.set("spark.master", "local")
+    conf.set("spark.app.name", "DemoSparkApp")
+    val sc = new SparkContext(conf)
+
+    val spark = SparkSession
+      .builder()
+      .appName("DemoSparkApp")
+      .config("spark.some.config.option", "some-value")
+      .getOrCreate()
+
+
+
+
+
+    /////////////
+    if (args.length == 0) {
+      println("Please write three parameters (file names)... ")
+    }
+    else if (!isDirectoryExists(pathFiles)){
+      //args.foreach(c => printIt(c))
+
+    }
+    else{
+
+      // Create DataFrames from files
+      val newdfMatchSkills = readCsvToDF(pathFiles + args(0) + ".csv")
+      val newdfMatchSmall = readCsvToDF(pathFiles + args(1) + ".csv")
+      val newdfPlayerMatchSmall = readCsvToDF(pathFiles + args(2) + ".csv")
+
+
+    ///////////
+/*    // Create DataFrames from files
+    val newdfMatchSkills = readCsvToDF("match_skill.csv")
+    val newdfMatchSmall = readCsvToDF("matches_small.csv")
+    val newdfPlayerMatchSmall = readCsvToDF("player_matches_small.csv")
+*/
+    // How many records/rows are there in DataFrames?
+    // To see the values in DataFrames
+    println(newdfMatchSkills.count())
+    newdfMatchSkills.show(10)
+    println(newdfMatchSmall.count())
+    newdfMatchSmall.show(10)
+    println(newdfPlayerMatchSmall.count())
+    newdfPlayerMatchSmall.show(10)
+
+    // To understand DataFrame schemas
+    newdfMatchSkills.printSchema()
+    newdfMatchSmall.printSchema()
+    newdfPlayerMatchSmall.printSchema()
+
+    // Clean NaN's from DataFrames
+    val dfMatchSkills = nanCleanse(newdfMatchSkills, newdfMatchSkills.columns)
+    val dfMatchSmall = nanCleanse(newdfMatchSmall, newdfMatchSmall.columns)
+    val dfPlayerMatchSmall = nanCleanse(newdfPlayerMatchSmall, newdfPlayerMatchSmall.columns)
+
+    /*
+    dfMatchSkills.select("match_id","skill").show(10)
+    dfMatchSmall.select("match_id","match_seq_num","start_time", "duration").show(10)
+    dfPlayerMatchSmall.select("match_id","gold_per_min", "account_id").show(10)
+    */
+
+    // Select required columns                       
+    val dfMatchSkills1 = dfMatchSkills
+      .select("match_id", "skill")
+    //val dfMatchSmall1 = dfMatchSmall
+    //                       .select("match_id","match_seq_num","start_time", "duration", "tower_status_radiant", "tower_status_dire", "barracks_status_radiant","barracks_status_dire","human_players")
+
+    // Select required columns                       
+    val dfPlayerMatchSmall1 = dfPlayerMatchSmall
+      .select("match_id", "gold_per_min", "account_id")
+    // Required castings and calculations for the result. 
+    // Then select required columns
+    val dfMatchSmall2 = dfMatchSmall.withColumn("start_time1", from_unixtime(col("start_time")))
+      .withColumn("end_time", from_unixtime(col("start_time").cast(LongType) + col("duration").cast(LongType)))
+      .withColumn("score", ((col("tower_status_radiant").cast(IntegerType) - col("tower_status_dire").cast(IntegerType)) + (col("barracks_status_radiant").cast(IntegerType) - col("barracks_status_dire").cast(IntegerType))) / col("human_players").cast(IntegerType))
+      .select("match_id", "match_seq_num", "start_time1", "end_time", "score")
+      .withColumnRenamed("start_time1", "start_time")
+
+    dfMatchSmall2.show()
+
+    // Join different pairs of tables in all possibilities --> Not empty    
+    dfPlayerMatchSmall1.join(dfMatchSmall2, "match_id").show()
+    dfMatchSkills1.join(dfPlayerMatchSmall1, "match_id").show()
+    dfMatchSkills1.join(dfMatchSmall2, "match_id").show()
+
+    // Join 3 tables --> Empty 
+    //val dfRes1 = dfMatchSkills1.join(dfPlayerMatchSmall1, "match_id").join(dfMatchSmall2, "match_id").orderBy(desc("skill"))
+    //dfRes1.show()     
+    //----->    dfMatchSkills1.join(dfPlayerMatchSmall1, "match_id").join(dfMatchSmall2, "match_id").orderBy("skill").show()
+
+    // Join with TempViews
+    dfMatchSkills1.createOrReplaceTempView("tbl1")
+    dfMatchSmall2.createOrReplaceTempView("tbl2")
+    dfPlayerMatchSmall1.createOrReplaceTempView("tbl3")
+
+    // Join 3 tables --> Empty 
+    val tableResult = spark.sqlContext.sql("Select tbl1.*, tbl2.*, tbl3.* FROM tbl1 INNER JOIN tbl2 on tbl1.match_id=tbl2.match_id INNER JOIN tbl3 on tbl3.match_id=tbl2.match_id order by tbl1.skill desc")
+    // Join 2 tables --> Not empty 
+    val tableResult4Two = spark.sqlContext.sql("Select tbl1.*, tbl2.match_seq_num, tbl2.start_time, tbl2.end_time, tbl2.score FROM tbl1 INNER JOIN tbl2 on tbl1.match_id=tbl2.match_id order by tbl1.skill desc")
+    tableResult.show()
+    tableResult4Two.show()
+
+    // Export DataFrame of joined 3 tables --> Empty   
+    tableResult.coalesce(1).write.format("parquet").option("header", "true").mode("overwrite").save(pathFiles + "/__outputTableResult__1file.parquet")
+    // Export DataFrame of joined 2 tables --> Not empty    
+    tableResult4Two.coalesce(1).write.format("parquet").option("header", "true").mode("overwrite").save(pathFiles + "/__outputTableResult4Two__1file.parquet")
+
+    }
+  }
+}
