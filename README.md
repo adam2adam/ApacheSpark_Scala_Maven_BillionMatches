@@ -1,2 +1,20 @@
-# ApacheSpark_Scala_Maven_BillionMatches
-This is a Scala Maven project on Apache Spark with billion matches sample data
+#  Billion Matches project with Scala Maven on Apache Spark
+
+**There are two different versions of this project:**
+
+* **Project for local run:** you can clone this repository  
+* **Databricks project link:**  [https://databricks-prod-cloudfront.cloud.databricks.com/...](https://databricks-prod-cloudfront.cloud.databricks.com/public/4027ec902e239c93eaaa8714f173bcfc/8541621492736890/671524711240630/2868629089952293/latest.html)
+
+##### @version v1.0.0
+
+## Functionality
+
+-	Maven as build tool
+-	Apache Spark as Data processing tool
+-	Input files can be found here under the "Samples" section: * [https://blog.opendota.com/2017/03/24/datadump2](https://blog.opendota.com/2017/03/24/datadump2/)
+-	Input file names: match_skill.csv, matches_small.csv, player_matches_small.csv
+-	Output file format: Parquet
+
+## Author
+
+* **Adem Sezer** - [adam2adam](https://github.com/adam2adam)
