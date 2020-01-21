@@ -21,7 +21,6 @@ object Matches {
     val conf = new SparkConf()
     conf.setMaster("local[*]")
     conf.setAppName("DemoSparkApp")
-    conf.set("spark.driver.allowMultipleContexts", "true")
     //conf.set("spark.master", "local")
     //conf.set("spark.app.name", "DemoSparkApp")
 
@@ -29,7 +28,7 @@ object Matches {
 
     val spark = SparkSession
       .builder()
-      .appName("DemoSparkApp1")
+      .appName("DemoSparkApp")
       //.config("spark.some.config.option", "some-value")
       .getOrCreate()
 
@@ -80,21 +79,21 @@ object Matches {
       .format("parquet")
       .option("header", "true")
       .mode("overwrite")
-      .save("__outputResult_1file.parquet")
-/*    // If you want to create a csv file
+      .save("output/output_1000sample_1file.parquet")
+    // If you want to create a csv file
     dfResult.coalesce(1)
       .write.format("com.databricks.spark.csv")
       .option("header", "true")
       .mode("overwrite")
-      .save("__outputResult_1000_1file.csv")
-*/
+      .save("output/output_1000sample_1file.csv")
+
     // Export DataFrame of joined 2 tables --> Not empty
     dfResults4TWO.coalesce(1)
       .write
       .format("parquet")
       .option("header", "true")
       .mode("overwrite")
-      .save("__outputResult4Two_1file.parquet")
+      .save("output/output4Two_1000sample_1file.parquet")
   }
 
   private def readFileToDfAndClean(spark: SparkSession, fileName: String): DataFrame = {
@@ -130,7 +129,7 @@ object Matches {
       .option("header", "true") //first line in file has headers
       .option("inferschema", "true")
       .load(fileName)
-    spark.stop()
+    //spark.stop()
     newDF
   }
   def nanCleanse(df: DataFrame, columns: Array[String]): DataFrame = {
