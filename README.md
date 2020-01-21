@@ -15,8 +15,15 @@
 -	Input files can be found here under the "Samples" section: [https://blog.opendota.com/2017/03/24/datadump2](https://blog.opendota.com/2017/03/24/datadump2/)
 -	Input file names: *match_skill.csv, matches_small.csv, player_matches_small.csv*
 -	Output file format: Parquet
+-	Scalatest library is used for testing
+-	".jar" file location: "target"
+
+## Notes
+- It's easier to test with smaller input files
+- Sample files (1000 records) can be found under "resources/data": *match_skill_1000.csv, matches_small_1000.csv, player_matches_small_1000.csv*
+
 
 ## Author
 
-* **Adem Sezer** - [https://github.com/adam2adam](https://github.com/adam2adam)
+* **Adem Sezer**
 

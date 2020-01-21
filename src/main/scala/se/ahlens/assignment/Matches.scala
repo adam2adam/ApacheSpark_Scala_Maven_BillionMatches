@@ -3,40 +3,41 @@ package se.ahlens.assignment
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.functions.{col, _}
 import org.apache.spark.sql.types.{IntegerType, LongType}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, SQLContext, SparkSession}
+
 import scala.reflect.io.File
 
 object Matches {
 
   def main(args: Array[String]) {
+    // Check arguments
     if (args.length != 3) {
       println("Please give three input parameters (file names)... ")
       return
     }
+    // Check filenames
     else if (!isFileExisting(args(0)) || !isFileExisting(args(1)) || !isFileExisting(args(2))){
-      println("Please check filenames... ")
+      println("One or more files missed! Please check filenames... ")
       return
     }
 
     val conf = new SparkConf()
     conf.setMaster("local[*]")
     conf.setAppName("DemoSparkApp")
-    //conf.set("spark.master", "local")
-    //conf.set("spark.app.name", "DemoSparkApp")
 
     val sc = new SparkContext(conf)
 
     val spark = SparkSession
       .builder()
       .appName("DemoSparkApp")
-      //.config("spark.some.config.option", "some-value")
       .getOrCreate()
 
-    // Create DataFrames from files
+    // Create DataFrames from files after cleaning from NaNs
     val dfMatchSkills = readFileToDfAndClean(spark, args(0))
     val dfMatchSmall = readFileToDfAndClean(spark, args(1))
     val dfPlayerMatchSmall = readFileToDfAndClean(spark, args(2))
 
+    //Prepare data and export output files
     prepareAndExport(dfMatchSkills, dfMatchSmall, dfPlayerMatchSmall)
     spark.stop()
   }
@@ -79,23 +80,25 @@ object Matches {
       .format("parquet")
       .option("header", "true")
       .mode("overwrite")
-      .save("output/output_1000sample_1file.parquet")
+      .save("output/output_1file.parquet")
+ /*
     // If you want to create a csv file
     dfResult.coalesce(1)
       .write.format("com.databricks.spark.csv")
       .option("header", "true")
       .mode("overwrite")
-      .save("output/output_1000sample_1file.csv")
-
+      .save("output/output_1file.csv")
+*/
     // Export DataFrame of joined 2 tables --> Not empty
     dfResults4TWO.coalesce(1)
       .write
       .format("parquet")
       .option("header", "true")
       .mode("overwrite")
-      .save("output/output4Two_1000sample_1file.parquet")
+      .save("output/output4Two_1file.parquet")
   }
 
+  // Create DataFrames from files after cleaning from NaNs
   private def readFileToDfAndClean(spark: SparkSession, fileName: String): DataFrame = {
     val df: DataFrame = readCsvToDF(spark, fileName)
     println(df.count())
@@ -105,6 +108,7 @@ object Matches {
     df2
   }
 
+  // Create DataFrames from files
   def readCsvToDF(spark: SparkSession, fileName: String): DataFrame = {
     val newDF = spark.sqlContext.read.format("com.databricks.spark.csv")
       .option("header", "true") //first line in file has headers
@@ -112,31 +116,14 @@ object Matches {
       .load(fileName)
     newDF
   }
-  // For testing
-  def readCsvToDF(fileName: String): DataFrame = {
-    val conf2 = new SparkConf()
-    conf2.setMaster("local[*]")
-    conf2.setAppName("DemoSparkApp")
 
-    val sc = new SparkContext(conf2)
-    val spark = SparkSession
-      .builder()
-      .appName("DemoSparkApp")
-      //.config("spark.some.config.option", "some-value")
-      .getOrCreate()
-
-    val newDF = spark.sqlContext.read.format("com.databricks.spark.csv")
-      .option("header", "true") //first line in file has headers
-      .option("inferschema", "true")
-      .load(fileName)
-    //spark.stop()
-    newDF
-  }
+  // Cleaning DataFrames from NaNs
   def nanCleanse(df: DataFrame, columns: Array[String]): DataFrame = {
     val retDF = df.na.fill(0, columns)
     retDF
   }
 
+  // Checking if files exist
   def isFileExisting(fileName: String): Boolean = {
     val file = File(fileName)
     if (file.isFile && file.exists) true else false
